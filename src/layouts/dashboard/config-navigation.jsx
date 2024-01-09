@@ -21,12 +21,12 @@ const navConfig = [
     childrenPath: ['/voting', '/detailEvent'],
     icon: icon('nomine'),
   },
-  {
-    title: 'Sondages',
-    path: routesName.sondages,
-    childrenPath: ['/sondages',],
-    icon: icon('sondage'),
-  },
+  // {
+  //   title: 'Sondages',
+  //   path: routesName.sondages,
+  //   childrenPath: ['/sondages',],
+  //   icon: icon('sondage'),
+  // },
   {
     title: 'Actualités',
     path: routesName.blog,
