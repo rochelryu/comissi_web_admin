@@ -236,7 +236,7 @@ export default function CreateAdminView() {
           Veuillez sélectionner un avatar pour cet administrateur
         </DialogTitle>
           <Grid container spacing={2} sx={{padding: 1}}>
-            {users.map((user, index) => <Avatar onClick={() => {
+            {users.map((user, index) => <Avatar key={`avatar-${index}`} onClick={() => {
               setAvatarChoice(index);
               handleAvatarModalOpen();
               }} sx={{ width: 76, height: 76, margin: 1 }} alt={user.name} src={user.avatarUrl} />)}
