@@ -54,7 +54,6 @@ export default function CreateActualityView() {
     const allDepartement = await ConsumApi.getAllDepartement();
     const admin = AdminStorage.getInfoAdmin();
     changeAuthor(admin.nom_complet);
-    console.log({base64, nameFileUploadBase64, allDepartement});
     if(!allDepartement.success) {
         message.error(allDepartement.message);
       
@@ -76,6 +75,7 @@ export default function CreateActualityView() {
           changeHate('');
           changeAuthor('');
           // editorRef.current
+          editorRef.current.setContent('');
           changeNameFileUploadBase64('');
         } else {
           alert({type: 'error', content: newActuality.message});

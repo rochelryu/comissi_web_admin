@@ -33,7 +33,6 @@ export default function VotingView() {
 
   const loadInfo = async () => {
     const {success, data} = await ConsumApi.getCompisition();
-    console.log(data);
     if(success) {
       if(data.length === 0) {
         setLoadCreateComponent(true);

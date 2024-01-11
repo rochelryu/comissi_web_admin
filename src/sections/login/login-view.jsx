@@ -53,7 +53,6 @@ export default function LoginView() {
     if(email.indexOf('@') !== -1 && password.length > 4) {
       changeIsVerify(true);
       const loggedInfo = await ConsumApi.login({email, password});
-      console.log(loggedInfo);
       changeIsVerify(false);
       if(loggedInfo.success) {
         const {name} = loggedInfo.data;

@@ -97,7 +97,6 @@ export default function CreateAdminView() {
       const arrayScoopGravatars = users[avatarChoice].avatarUrl.split('/');
       const gravatars = arrayScoopGravatars[arrayScoopGravatars.length - 1];
       const adminCreated = await ConsumApi.createAdmin({nom_complet:fullName.trim(), email:email.trim(),password:password.trim(),departement_id:departement, role_id: 2, contact: contact.trim(), gravatars});
-      console.log(adminCreated);
       if(adminCreated.success) {
         message.success(`${fullName.trim().toLocaleUpperCase()} a été crée.`);
         selectDepartement('');
@@ -168,7 +167,6 @@ export default function CreateAdminView() {
                   label="Département"
                   sx={{width: '100%'}}
                   onChange={(event)=> {
-                    console.log(event.target.value);
                     selectDepartement(event.target.value);
                   }}
                 >

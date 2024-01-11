@@ -152,7 +152,6 @@ export default function CreateVotingSystem(props) {
 
   const verifyPositionStep = async () => {
     const allCandidateActivate = await ConsumApi.getAllCandidateActive();
-    console.log(allCandidateActivate);
     const options = allCandidateActivate.data.map((item) => ({
         label: item.matricule,
         value: `${item.matricule.trim()}_${item.firstName.trim()} ${item.lastName.trim()}`,
@@ -269,7 +268,6 @@ export default function CreateVotingSystem(props) {
 
   const choiceCandidate = (value) => {
     setCandidatesChoice(value);
-    console.log(candidatesChoice);
   }
 
 
@@ -379,9 +377,6 @@ export default function CreateVotingSystem(props) {
                 onChange={(value, dateString) => {
                   if(value.length > 1) {
                     setRangeDateEvent(value);
-                    console.log(value[0].toDate());
-                    console.log(value[1].toISOString());
-                    console.log(dateString);
                   }
                   
                 }}

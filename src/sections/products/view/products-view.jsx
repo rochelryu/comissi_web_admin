@@ -56,7 +56,6 @@ export default function ProductsView() {
 
   const loadInfo = async () => {
     const {success, data} = await ConsumApi.getDetailsEvent({eventId});
-    console.log(data[0]);
     if(success) {
       setEvent(data[0]);
       toogleDisplay(data[0].display === 1);

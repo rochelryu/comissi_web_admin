@@ -33,7 +33,6 @@ export default function Nav({ openNav, onCloseNav }) {
 
   useEffect(() => {
     const adminLocal = AdminStorage.getInfoAdmin();
-    console.log(adminLocal);
     setAdmin(adminLocal);
     if (openNav) {
       onCloseNav();

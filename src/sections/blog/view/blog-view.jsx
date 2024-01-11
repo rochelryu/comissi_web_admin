@@ -37,7 +37,6 @@ export default function BlogView() {
     const allActuality = await ConsumApi.getAllActuality();
     if(allActuality.success) {
       setActualities(allActuality.data);
-      console.log(allActuality.data);
       setFetch(false);
     } else {
       message.error(allActuality.message);

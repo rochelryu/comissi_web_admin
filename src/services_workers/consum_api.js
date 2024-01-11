@@ -62,9 +62,7 @@ export default class ConsumApi {
       const {admin_id} = AdminStorage.getInfoAdmin();
       const { id } = AdminStorage.getInfoCompetition();
       const body = {base64: base64.split(',')[1], name_file, beginDate, competition_id:id, endDate, price, devise, location, typeTicket, admin_id};
-      console.log(body);
       const response = await this.api.post(apiUrl.createEvent, body, {headers: {'Authorization': `Bearer ${token}`}});
-      console.log(response.data);
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
           if(success) {
@@ -87,10 +85,6 @@ export default class ConsumApi {
     try {
       
       const token = AdminStorage.getTokenAdmin();
-      console.log({
-        url: `${apiUrl.detailEvent}/${eventId}`,
-      })
-      console.log(token);
         const response = await this.api.get(`${apiUrl.detailEvent}/${eventId}`, {headers: {'Authorization': `Bearer ${token}`}});
         if (response.status === 200) {
           const { data , success, message = ''} = response.data;
@@ -175,7 +169,6 @@ export default class ConsumApi {
     try {
       const token = AdminStorage.getTokenAdmin();
       const {admin_id} = AdminStorage.getInfoAdmin();
-      console.log({event_id, display, admin_id});
       const response = await this.api.post(apiUrl.toogleDisplayEvent, {event_id, display, admin_id}, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -197,7 +190,6 @@ export default class ConsumApi {
   static async setNumberNominate({event_id, ranking, candidate_id}) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      console.log({event_id, ranking, candidate_id});
       const response = await this.api.post(apiUrl.addNumberNominate, {event_id, ranking, candidate_id}, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -323,8 +315,7 @@ export default class ConsumApi {
       try {
         const token = AdminStorage.getTokenAdmin();
         const body = {nom_complet, email, password, departement_id, role_id, gravatars, contact};
-        console.log({body, token, url:apiUrl.addadmin });
-          const response = await this.api.post(apiUrl.addadmin, {nom_complet, email, password, departement_id, role_id, gravatars, contact}, {headers: {'Authorization': `Bearer ${token}`}});
+          const response = await this.api.post(apiUrl.addadmin, body, {headers: {'Authorization': `Bearer ${token}`}});
           if (response.status === 200) {
             const { data , success, message = ''} = response.data;
             if(success) return { data , success}

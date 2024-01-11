@@ -27,7 +27,6 @@ import Iconify from 'src/components/iconify';
 
 export default function VotingCard({ post, index }) {
   const { cover, title, id, beginDate, endDate, display } = post;
-  console.log(post);
   const router = useRouter();
 
   const renderTitle = (
@@ -110,7 +109,7 @@ export default function VotingCard({ post, index }) {
             </Box>
           </Card>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Button variant="contained" onClick={(event) => { event.preventDefault(); console.log(`modifier ${id}`)}} color="info" startIcon={<Iconify icon="iconamoon:edit-light" />}>
+              <Button variant="contained" onClick={(event) => { event.preventDefault()}} color="info" startIcon={<Iconify icon="iconamoon:edit-light" />}>
                 Modifier
               </Button>
               <Button onClick={(event) => {
