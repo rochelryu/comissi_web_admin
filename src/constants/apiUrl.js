@@ -1,6 +1,6 @@
 
-const base_url = 'https://bcomissi.shouz.network/api/admin'; // process.env.NODE_ENV === 'development' ? 'https://comici.loca.lt/api/admin':'api_prod/admin';
-const base_url_asset = 'https://bcomissi.shouz.network/images'; // process.env.NODE_ENV === 'development' ? 'https://comici.loca.lt/images':'api_prod/admin';
+const base_url = process.env.NODE_ENV === 'development' ? 'https://comici.loca.lt/api/admin':'https://bcomissi.shouz.network/api/admin';
+const base_url_asset = process.env.NODE_ENV === 'development' ? 'https://comici.loca.lt/images':'https://bcomissi.shouz.network/images';
 
 export const apiUrl =  {
     authentication: `${base_url}/login`,
@@ -14,6 +14,10 @@ export const apiUrl =  {
     createDepartement: `${base_url}/postdepartement`,
     allDepartements: `${base_url}/alldepartement`,
     updateDepartement: `${base_url}/updatedepartement`,
+
+    // gestion departement
+    allRoles: `${base_url}/getrole`,
+
     // gestion competition
     createCompetition: `${base_url}/postcompetitions`,
     getCompetition: `${base_url}/getcompetition`,

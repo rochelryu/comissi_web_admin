@@ -23,3 +23,7 @@ export const users = [...Array(24)].map((_, index) => ({
     'Full Stack Developer',
   ]),
 }));
+
+export const flags = [...Array(3)].map((_, index) => ({
+  avatarUrl: `/assets/images/avatars/Flag_of_${index+1}.png`,
+}))

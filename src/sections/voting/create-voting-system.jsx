@@ -300,7 +300,7 @@ export default function CreateVotingSystem(props) {
                   <ImgCrop showGrid rotationSlider aspectSlider showReset>
                     <Upload
                       listType="picture"
-                      accept='image/png, image/jpeg'
+                      accept='image/png, image/jpeg, image/webp'
                       fileList={fileList}
                       beforeUpload={(file) => false}
                       onChange={onChangeCompetitionCover}
@@ -351,7 +351,7 @@ export default function CreateVotingSystem(props) {
                 <ImgCrop showGrid rotationSlider aspectSlider showReset>
                   <Upload
                     listType="picture"
-                    accept='image/png, image/jpeg'
+                    accept='image/png, image/jpeg, image/webp'
                     fileList={fileList}
                     beforeUpload={(file) => false}
                     onChange={onChangeCompetitionCover}

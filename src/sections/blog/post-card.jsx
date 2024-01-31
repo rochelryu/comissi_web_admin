@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import { useRouter } from 'src/routes/hooks';
 
 import { fDate } from 'src/utils/format-time';
-import { fShortenNumber } from 'src/utils/format-number';
+import { fNumber } from 'src/utils/format-number';
 
 import {routesName} from 'src/constants/routes';
 import {apiUrlAsset} from 'src/constants/apiUrl';
@@ -73,7 +73,7 @@ export default function PostCard({ actuality, index }) {
           }}
         >
           <Iconify width={16} icon={info.icon} sx={{ mr: 0.5 }} />
-          <Typography variant="caption">{fShortenNumber(info.number)}</Typography>
+          <Typography variant="caption">{fNumber(info.number)}</Typography>
         </Stack>
       ))}
     </Stack>
@@ -124,7 +124,7 @@ export default function PostCard({ actuality, index }) {
                 width: '100%',
                 height: '100%',
                 position: 'absolute',
-                bgcolor: (theme) => alpha(theme.palette.grey[900], 0.72),
+                bgcolor: (theme) => alpha(theme.palette.grey[900], 0.42),
               },
           }}
         >

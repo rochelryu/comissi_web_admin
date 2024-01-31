@@ -1,4 +1,3 @@
-import { message } from 'antd';
 import { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
@@ -49,17 +48,14 @@ export default function UserPage() {
 
   const loadData = async () => {
     const allAdmin = await ConsumApi.getAllAdmin();
+    console.log(allAdmin);
     if(allAdmin.success) {
       setAdmins(allAdmin.data);
-    } else {
-      message.error(allAdmin.message);
-      if(allAdmin.message === "Session Expiré veuillez vous réconnecter") {
+    } else if(!allAdmin.success && allAdmin.error.message === "Session Expiré veuillez vous réconnecter") {
         setTimeout(() => {
           router.reload();
         }, 1000);
       }
-    }
-    
   }
 
   const handleSort = (event, id) => {

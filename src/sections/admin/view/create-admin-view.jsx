@@ -24,8 +24,9 @@ import DialogContentText from '@mui/material/DialogContentText';
 
 import { useRouter } from 'src/routes/hooks';
 
-import { users } from 'src/_mock/user';
+import { users, flags } from 'src/_mock/user';
 import ConsumApi from 'src/services_workers/consum_api';
+import {AdminStorage} from 'src/storages/admins_storage';
 
 import Iconify from 'src/components/iconify';
 // ----------------------------------------------------------------------
@@ -37,7 +38,10 @@ export default function CreateAdminView() {
   
   const [showPassword, setShowPassword] = useState(false);
   const [avatarChoice, setAvatarChoice] = useState(8);
+  const [role, setRole] = useState(0);
   const [departements, setDepartements] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [roleChoice, setRoleChoice] = useState(0);
   const [departement, selectDepartement] = useState('');
   const [nameDepartement, changeNameDepartement] = useState('');
   const [fullName, changeFullName] = useState('');
@@ -54,7 +58,12 @@ export default function CreateAdminView() {
 
   const loadData = async () => {
     const allDepartement = await ConsumApi.getAllDepartement();
+    const allRoles = await ConsumApi.getAllRole();
+    const {role : roleLocal} = AdminStorage.getInfoAdmin();
+    setRole(roleLocal);
+    console.log(allRoles.data[0].nom_role);
     if(allDepartement.success) {
+      setRoles(allRoles.data.filter(roleItem => roleItem.nom_role.toLocaleUpperCase() !== "SUPERAMDIN"))
       setDepartements(allDepartement.data.filter(departementItem => departementItem.nom_departement.toLocaleLowerCase() !== 'general'));
     } else {
       message.error(allDepartement.message);
@@ -79,9 +88,9 @@ export default function CreateAdminView() {
         message.error(allDepartement.message);
         if(allDepartement.message === "Session Expiré veuillez vous réconnecter") {
           handleToogleDialogCreateDepartement();
-          setTimeout(() => {
-            router.reload();
-          }, 1000);
+          // setTimeout(() => {
+          //   router.reload();
+          // }, 1000);
         }
       }
       handleToogleDialogCreateDepartement();
@@ -146,13 +155,38 @@ export default function CreateAdminView() {
           }}
         >
           <Stack spacing={3}>
-          <Stack direction="row" alignItems="center" justifyContent="center" mb={1}>
-            <Avatar alt='defaultProfil' src={users[avatarChoice].avatarUrl} sx={{height: 100, width: 100, mr: 1}}/>
-            <Button variant="contained" onClick={handleAvatarModalOpen}  color="inherit" startIcon={<Iconify icon="ic:twotone-camera" />}>
-              Changer de profil
-            </Button>
-          </Stack>
-          
+            {
+              role === 1 && (
+                <>
+                <InputLabel id="demo-simple-select-label">Type Administrateur</InputLabel>
+                <Grid container spacing={1} alignItems='center' justifyContent='center'>
+                  <Grid item xs={12} sm={12} md={12}>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={roleChoice}
+                      placeholder='Type Admin'
+                      label="Type Admin"
+                      sx={{width: '100%'}}
+                      onChange={(event)=> {
+                        setAvatarChoice(0);
+                        setRoleChoice(parseInt(event.target.value, 10));
+                      }}
+                    >
+                      {roles.map((roleItem) => (<MenuItem key={roleItem.id} value={roleItem.id}>{roleItem.nom_role.trim().toLocaleUpperCase()}</MenuItem>))}
+                    </Select>
+                  </Grid>
+                </Grid>
+                </>
+              )
+            }
+            <Stack direction="row" alignItems="center" justifyContent="center" mb={1}>
+              <Avatar alt='defaultProfil' src={roleChoice === 2 ? flags[avatarChoice].avatarUrl :users[avatarChoice].avatarUrl} sx={{height: 100, width: 100, mr: 1}}/>
+              <Button variant="contained" onClick={handleAvatarModalOpen}  color="inherit" startIcon={<Iconify icon="ic:twotone-camera" />}>
+                Changer de profil
+              </Button>
+            </Stack>
+
             <TextField value={fullName} onChange={(event) => {changeFullName(event.target.value)}} name="name" label="Nom Complet" />
             <TextField value={email} onChange={(event) => {changeEmail(event.target.value)}} name="Email" label="Email" type='email' />
             <TextField value={contact} onChange={(event) => {changeContact(event.target.value)}} name="contact" label="Contact" type='tel' />
@@ -177,6 +211,7 @@ export default function CreateAdminView() {
                 <Button variant="text" onClick={handleToogleDialogCreateDepartement}>Departement introuvable ?</Button>
               </Grid>
             </Grid>
+
             <TextField
               value={password} onChange={(event) => {changePassword(event.target.value)}}
             
@@ -234,10 +269,18 @@ export default function CreateAdminView() {
           Veuillez sélectionner un avatar pour cet administrateur
         </DialogTitle>
           <Grid container spacing={2} sx={{padding: 1}}>
-            {users.map((user, index) => <Avatar key={`avatar-${index}`} onClick={() => {
-              setAvatarChoice(index);
-              handleAvatarModalOpen();
-              }} sx={{ width: 76, height: 76, margin: 1 }} alt={user.name} src={user.avatarUrl} />)}
+            {
+              roleChoice === 2 ?
+              flags.map((flag, index) => <Avatar key={`avatar-${index}`} onClick={() => {
+                setAvatarChoice(index);
+                handleAvatarModalOpen();
+                }} sx={{ width: 76, height: 76, margin: 1 }} alt={flag.avatarUrl} src={flag.avatarUrl} />)
+                :
+              users.map((user, index) => <Avatar key={`avatar-${index}`} onClick={() => {
+                setAvatarChoice(index);
+                handleAvatarModalOpen();
+                }} sx={{ width: 76, height: 76, margin: 1 }} alt={user.name} src={user.avatarUrl} />)
+              }
           </Grid>
         <DialogActions>
           <Button onClick={handleAvatarModalOpen}>Annuler</Button>

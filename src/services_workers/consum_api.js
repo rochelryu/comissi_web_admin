@@ -10,8 +10,7 @@ export default class ConsumApi {
   static async createCompetition({base64, name_file, title, describe}) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const {admin_id} = AdminStorage.getInfoAdmin();
-      const body = {base64: base64.split(',')[1], name_file, title, describe, admin_id};
+      const body = {base64: base64.split(',')[1], name_file, title, describe, };
       const response = await this.api.post(apiUrl.createCompetition, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -34,9 +33,8 @@ export default class ConsumApi {
   static async setNominate({nominate}) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const {admin_id} = AdminStorage.getInfoAdmin();
       const { id } = AdminStorage.getInfoEdition();
-      const body = {candidates: nominate, event_id: id, admin_id};
+      const body = {candidates: nominate, event_id: id, };
       const response = await this.api.post(apiUrl.setNominate, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -59,9 +57,8 @@ export default class ConsumApi {
   static async createEvent({base64, name_file, beginDate, endDate, price, devise, location, typeTicket}) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const {admin_id} = AdminStorage.getInfoAdmin();
       const { id } = AdminStorage.getInfoCompetition();
-      const body = {base64: base64.split(',')[1], name_file, beginDate, competition_id:id, endDate, price, devise, location, typeTicket, admin_id};
+      const body = {base64: base64.split(',')[1], name_file, beginDate, competition_id:id, endDate, price, devise, location, typeTicket, };
       const response = await this.api.post(apiUrl.createEvent, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -150,8 +147,8 @@ export default class ConsumApi {
           if (response.status === 200) {
             const { data , success, message = ''} = response.data;
             if(success) {
-              const {name:nom_complet, email:emailData, access_token, gravatars, role, admin_id } = data;
-              AdminStorage.saveInfoAdmin({nom_complet, email:emailData, gravatars, role, admin_id });
+              const {name:nom_complet, email:emailData, access_token, gravatars, role,  } = data;
+              AdminStorage.saveInfoAdmin({nom_complet, email:emailData, gravatars, role,  });
               AdminStorage.saveTokenAdmin(access_token);
               return { data , success};
             }
@@ -168,8 +165,7 @@ export default class ConsumApi {
   static async toogleEvent({event_id, display}) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const {admin_id} = AdminStorage.getInfoAdmin();
-      const response = await this.api.post(apiUrl.toogleDisplayEvent, {event_id, display, admin_id}, {headers: {'Authorization': `Bearer ${token}`}});
+      const response = await this.api.post(apiUrl.toogleDisplayEvent, {event_id, display, }, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
           if(success) {
@@ -229,6 +225,25 @@ export default class ConsumApi {
     }
   }
 
+  static async getAllRole() {
+    try {
+      const token = AdminStorage.getTokenAdmin();
+        const response = await this.api.get(apiUrl.allRoles, {headers: {'Authorization': `Bearer ${token}`}});
+        if (response.status === 200) {
+          const { data , success, message = ''} = response.data;
+          if(success) return { data , success}
+          if(!success && message.indexOf('token') !== -1) {
+            AdminStorage.clearStokage();
+            return { message: "Session Expiré veuillez vous réconnecter" , success};
+          } 
+          return { message , success};
+        }
+        return {etat: false, error: Error("Un problème avec le serveur. Veuillez réssayer ultérieurement")}
+    } catch (error) {
+      return {etat: false, error: Error("Un problème lors de l'envoie. Veuillez vérifier votre connexion internet")}
+    }
+  }
+
   static async createDepartement({nom_departement}) {
     try {
       const token = AdminStorage.getTokenAdmin();
@@ -237,7 +252,9 @@ export default class ConsumApi {
           const { data , success, message = ''} = response.data;
           if(success) return { data , success}
           if(!success && message.indexOf('token') !== -1) {
-            AdminStorage.clearStokage();
+            console.log(message);
+            console.log(message);
+            // AdminStorage.clearStokage();
             return { message: "Session Expiré veuillez vous réconnecter" , success};
           } 
           return { message , success};
@@ -273,8 +290,7 @@ export default class ConsumApi {
   static async getCompisition() {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const {admin_id} = AdminStorage.getInfoAdmin();
-        const response = await this.api.get(`${apiUrl.getCompetition}/${admin_id}`, {headers: {'Authorization': `Bearer ${token}`}});
+        const response = await this.api.get(`${apiUrl.getCompetition}`, {headers: {'Authorization': `Bearer ${token}`}});
         if (response.status === 200) {
           const { data , success, message = ''} = response.data;
           if(success) return { data , success}
@@ -307,6 +323,10 @@ export default class ConsumApi {
           }
           return {etat: false, error: Error("Un problème avec le serveur. Veuillez réssayer ultérieurement")}
       } catch (error) {
+        if(error.message === "Request failed with status code 401") {
+          localStorage.clear();
+          return {etat: false, error: Error("Session Expiré veuillez vous réconnecter")}
+        }
         return {etat: false, error: Error("Un problème lors de l'envoie. Veuillez vérifier votre connexion internet")}
       }
     }
