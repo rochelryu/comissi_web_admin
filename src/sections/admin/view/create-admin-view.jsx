@@ -61,7 +61,6 @@ export default function CreateAdminView() {
     const allRoles = await ConsumApi.getAllRole();
     const {role : roleLocal} = AdminStorage.getInfoAdmin();
     setRole(roleLocal);
-    console.log(allRoles.data[0].nom_role);
     if(allDepartement.success) {
       setRoles(allRoles.data.filter(roleItem => roleItem.nom_role.toLocaleUpperCase() !== "SUPERAMDIN"))
       setDepartements(allDepartement.data.filter(departementItem => departementItem.nom_departement.toLocaleLowerCase() !== "cote d'ivoire").sort((a,b) => a.nom_departement - b.nom_departement));
@@ -171,7 +170,6 @@ export default function CreateAdminView() {
                       sx={{width: '100%'}}
                       onChange={(event)=> {
                         setAvatarChoice(0);
-                        console.log(parseInt(event.target.value, 10));
                         setRoleChoice(parseInt(event.target.value, 10));
                       }}
                     >

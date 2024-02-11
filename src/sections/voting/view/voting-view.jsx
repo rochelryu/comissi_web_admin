@@ -38,7 +38,6 @@ export default function VotingView() {
 
   const loadInfo = async () => {
     const {success, data} = await ConsumApi.getCompetition(router);
-    console.log(data);
     if(success) {
       if(data.length === 0) {
         setLoadCreateComponent(true);

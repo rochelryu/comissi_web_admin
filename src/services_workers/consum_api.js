@@ -11,7 +11,6 @@ export default class ConsumApi {
     try {
       const token = AdminStorage.getTokenAdmin();
       const body = {base64Cover: base64Cover.split(',')[1],base64LastMiss: base64LastMiss.split(',')[1], name_file_cover,name_file_last_miss, title, describe, };
-      console.log(body);
       const response = await this.api.post(apiUrl.createCompetition, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -20,7 +19,6 @@ export default class ConsumApi {
             return { data , success}
           }
           if(!success && message.indexOf('token') !== -1) {
-            console.log(message);
             // AdminStorage.clearStokage();
             // router.reload();
             return { error: Error(message) , success};
@@ -254,7 +252,6 @@ export default class ConsumApi {
           const { data , success, message = ''} = response.data;
           if(success) return { data , success}
           if(!success && message.indexOf('token') !== -1) {
-            console.log(message);
             AdminStorage.clearStokage();
             return { message: "Session Expiré veuillez vous réconnecter" , success};
           } 
@@ -294,7 +291,6 @@ export default class ConsumApi {
         const response = await this.api.get(`${apiUrl.getCompetition}`, {headers: {'Authorization': `Bearer ${token}`}});
         if (response.status === 200) {
           const { data , success, message = ''} = response.data;
-          console.log({ data , success, message})
           if(success) return { data , success}
           if(!success && (message.indexOf('token') !== -1 || message.indexOf('Erreur') !== -1)) {
             AdminStorage.clearStokage();
@@ -339,7 +335,6 @@ export default class ConsumApi {
       try {
         const token = AdminStorage.getTokenAdmin();
         const body = {nom_complet, email, password, departement_id, role_id, gravatars, contact};
-        console.log(body);
           const response = await this.api.post(apiUrl.addadmin, body, {headers: {'Authorization': `Bearer ${token}`}});
           if (response.status === 200) {
             const { data , success, message = ''} = response.data;

@@ -184,7 +184,6 @@ export default function CreateVotingSystem(props) {
 
   const onChangeTypeCompetition = (checked) => {
     setIsFinalCompetition(checked);
-    console.log(isFinalCompetition);
   };
 
   const onChangeCompetitionCover = ({ fileList: newFileList }) => {
@@ -232,7 +231,6 @@ export default function CreateVotingSystem(props) {
         alert({type: 'loading', content: "Enregistrement en cours..."});
         const newCompetion = await ConsumApi.createCompetition({base64Cover: base64Cover.trim(), name_file_cover: nameFileUploadBase64Cover.trim(),base64LastMiss: base64LastMiss.trim(), name_file_last_miss: nameFileUploadBase64LastMiss.trim(), title: nameCompetition.trim(), describe: descriptionCompetition.trim()}, router);
         setButtonIsLoading(false);
-        console.log(newCompetion);
         if(newCompetion.success) {
           setFileListCover([]);
           setFileListLastMiss([]);
@@ -321,7 +319,6 @@ export default function CreateVotingSystem(props) {
   // }
   const choiceAdmin = (value) => {
     setAdminChoice(value);
-    console.log(adminChoice);
   }
 
 
