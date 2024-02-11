@@ -64,7 +64,7 @@ export default function CreateAdminView() {
     console.log(allRoles.data[0].nom_role);
     if(allDepartement.success) {
       setRoles(allRoles.data.filter(roleItem => roleItem.nom_role.toLocaleUpperCase() !== "SUPERAMDIN"))
-      setDepartements(allDepartement.data.filter(departementItem => departementItem.nom_departement.toLocaleLowerCase() !== 'general'));
+      setDepartements(allDepartement.data.filter(departementItem => departementItem.nom_departement.toLocaleLowerCase() !== "cote d'ivoire").sort((a,b) => a.nom_departement - b.nom_departement));
     } else {
       message.error(allDepartement.message);
       if(allDepartement.message === "Session Expiré veuillez vous réconnecter") {
@@ -73,24 +73,23 @@ export default function CreateAdminView() {
         }, 1000);
       }
     }
-    
   }
 
   const createDepartement = async () => {
-    
     if(nameDepartement.trim().length > 2 ) {
       message.loading("Création en cours");
       const allDepartement = await ConsumApi.createDepartement({nom_departement: nameDepartement.trim()});
       if(allDepartement.success) {
         message.success(`${nameDepartement.trim().toLocaleUpperCase()} a été ajouté.`);
-        setDepartements(allDepartement.data.filter(departementItem => departementItem.nom_departement.toLocaleLowerCase() !== 'general'));
+        changeNameDepartement('');
+        setDepartements(allDepartement.data.filter(departementItem => departementItem.nom_departement.toLocaleLowerCase() !== "cote d'ivoire").sort((a,b) => a.nom_departement - b.nom_departement));
       } else {
         message.error(allDepartement.message);
         if(allDepartement.message === "Session Expiré veuillez vous réconnecter") {
           handleToogleDialogCreateDepartement();
-          // setTimeout(() => {
-          //   router.reload();
-          // }, 1000);
+          setTimeout(() => {
+            router.reload();
+          }, 1000);
         }
       }
       handleToogleDialogCreateDepartement();
@@ -103,9 +102,9 @@ export default function CreateAdminView() {
     
     if(fullName.trim().length > 2 && email.trim().indexOf('@') !== -1 && contact.trim().length >= 6 && departement !== '' && password.trim().length > 2) {
       message.loading("Création en cours");
-      const arrayScoopGravatars = users[avatarChoice].avatarUrl.split('/');
+      const arrayScoopGravatars = roleChoice === 2 ? flags[avatarChoice].avatarUrl.split('/') : users[avatarChoice].avatarUrl.split('/');
       const gravatars = arrayScoopGravatars[arrayScoopGravatars.length - 1];
-      const adminCreated = await ConsumApi.createAdmin({nom_complet:fullName.trim(), email:email.trim(),password:password.trim(),departement_id:departement, role_id: 2, contact: contact.trim(), gravatars});
+      const adminCreated = await ConsumApi.createAdmin({nom_complet:fullName.trim(), email:email.trim(),password:password.trim(),departement_id:departement, role_id: roleChoice, contact: contact.trim(), gravatars});
       if(adminCreated.success) {
         message.success(`${fullName.trim().toLocaleUpperCase()} a été crée.`);
         selectDepartement('');
@@ -113,6 +112,8 @@ export default function CreateAdminView() {
         changeEmail('');
         changeContact('');
         changePassword('');
+        setRoleChoice(0);
+        setAvatarChoice(0);
         setShowPassword(false);
       } else {
         message.error(adminCreated.message);
@@ -170,6 +171,7 @@ export default function CreateAdminView() {
                       sx={{width: '100%'}}
                       onChange={(event)=> {
                         setAvatarChoice(0);
+                        console.log(parseInt(event.target.value, 10));
                         setRoleChoice(parseInt(event.target.value, 10));
                       }}
                     >

@@ -8,6 +8,8 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
+import { useRouter } from 'src/routes/hooks';
+
 import ConsumApi from 'src/services_workers/consum_api';
 import {AdminStorage} from 'src/storages/admins_storage';
 
@@ -21,24 +23,28 @@ import CreateVotingSystem from '../create-voting-system';
 
 export default function VotingView() {
   const [isFetching, setFetch] = useState(true);
+  const router = useRouter();
   const [loadCreateComponent, setLoadCreateComponent] = useState(false);
   const [levelCreateComponent, setLevelCreateComponent] = useState(0);
   const [competition, setCompetition] = useState({});
   const [editions, setEditions] = useState([]);
+  const admin = AdminStorage.getInfoAdmin();
 
   useEffect(() => {
     loadInfo();
     window.scrollTo(0, 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadInfo = async () => {
-    const {success, data} = await ConsumApi.getCompisition();
+    const {success, data} = await ConsumApi.getCompetition(router);
+    console.log(data);
     if(success) {
       if(data.length === 0) {
         setLoadCreateComponent(true);
         setLevelCreateComponent(0);
         setFetch(false);
-      } else if (data.length > 0 && data[0].events.length === 0) {
+      } else if (data.length === 1 && data[0].events.length === 0) {
         setLoadCreateComponent(true);
         setLevelCreateComponent(1);
         // eslint-disable-next-line no-unused-vars
@@ -64,20 +70,26 @@ export default function VotingView() {
 
       {!isFetching && !loadCreateComponent && (
         <>
-          <VotingCompetion  post={competition} index={2} sx={{marginBottom: 2}} />
+          <VotingCompetion  post={competition} admin={admin} index={2} sx={{marginBottom: 2}} />
 
           <Stack mb={5} direction="row" alignItems="center" justifyContent="space-between">
             {/* <PostSearch posts={posts} /> */}
-            <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-              Ajouter Évènement
-            </Button>
+            {
+                admin.role <= 2 &&
+                (
+                  <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+                    Ajouter Évènement
+                  </Button>
+                )
+              }
+            
           </Stack>
 
 
           <Grid container spacing={2}>
 
             {editions.map((edition, index) => (
-              <VotingCard key={`edition-${edition.id}`} post={edition} index={index} />
+              <VotingCard admin={admin}  key={`edition-${edition.id}`} post={edition} index={index} />
             ))}
           </Grid>
         </>
@@ -101,7 +113,6 @@ export default function VotingView() {
                   <Skeleton variant="rectangular" sx={{width: '40%' , height: 160, borderRadius: 1, marginRight: 2}} animation='wave' />
                   <Skeleton variant="rectangular" sx={{width: '50%' , height: 100, borderRadius: 1}} animation='wave' />
                 </Stack>
-                  
               </Grid>
             ))}
           </Grid>

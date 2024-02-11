@@ -7,10 +7,11 @@ export default class ConsumApi {
   static api = axios.create();
 
   // eslint-disable-next-line class-methods-use-this
-  static async createCompetition({base64, name_file, title, describe}) {
+  static async createCompetition({base64Cover, base64LastMiss, name_file_cover, name_file_last_miss, title, describe}, router) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const body = {base64: base64.split(',')[1], name_file, title, describe, };
+      const body = {base64Cover: base64Cover.split(',')[1],base64LastMiss: base64LastMiss.split(',')[1], name_file_cover,name_file_last_miss, title, describe, };
+      console.log(body);
       const response = await this.api.post(apiUrl.createCompetition, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -19,9 +20,11 @@ export default class ConsumApi {
             return { data , success}
           }
           if(!success && message.indexOf('token') !== -1) {
-            AdminStorage.clearStokage();
-            return { message: "Session Expiré veuillez vous réconnecter" , success};
-          } 
+            console.log(message);
+            // AdminStorage.clearStokage();
+            // router.reload();
+            return { error: Error(message) , success};
+          }
           return { message , success};
       }
       return {etat: false, error: Error("Un problème avec le serveur. Veuillez réssayer ultérieurement")}
@@ -30,11 +33,10 @@ export default class ConsumApi {
     }
   }
 
-  static async setNominate({nominate}) {
+  static async setNominate({nominate, event_id}) {
     try {
       const token = AdminStorage.getTokenAdmin();
-      const { id } = AdminStorage.getInfoEdition();
-      const body = {candidates: nominate, event_id: id, };
+      const body = {candidates: nominate, event_id, };
       const response = await this.api.post(apiUrl.setNominate, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -54,11 +56,11 @@ export default class ConsumApi {
     }
   }
 
-  static async createEvent({base64, name_file, beginDate, endDate, price, devise, location, typeTicket}) {
+  static async createEvent({base64, name_file, admin_id ,beginDate, endDate, price, devise, location, typeTicket, level, title}) {
     try {
       const token = AdminStorage.getTokenAdmin();
       const { id } = AdminStorage.getInfoCompetition();
-      const body = {base64: base64.split(',')[1], name_file, beginDate, competition_id:id, endDate, price, devise, location, typeTicket, };
+      const body = {base64: base64.split(',')[1], name_file, beginDate, competition_id: id, endDate, price, devise, location, typeTicket,admin_id, level, title: title.trim()};
       const response = await this.api.post(apiUrl.createEvent, body, {headers: {'Authorization': `Bearer ${token}`}});
       if (response.status === 200) {
         const { data , success, message = ''} = response.data;
@@ -253,8 +255,7 @@ export default class ConsumApi {
           if(success) return { data , success}
           if(!success && message.indexOf('token') !== -1) {
             console.log(message);
-            console.log(message);
-            // AdminStorage.clearStokage();
+            AdminStorage.clearStokage();
             return { message: "Session Expiré veuillez vous réconnecter" , success};
           } 
           return { message , success};
@@ -287,15 +288,17 @@ export default class ConsumApi {
   }
 
   // Gestion Competitions
-  static async getCompisition() {
+  static async getCompetition(router) {
     try {
       const token = AdminStorage.getTokenAdmin();
         const response = await this.api.get(`${apiUrl.getCompetition}`, {headers: {'Authorization': `Bearer ${token}`}});
         if (response.status === 200) {
           const { data , success, message = ''} = response.data;
+          console.log({ data , success, message})
           if(success) return { data , success}
-          if(!success && message.indexOf('token') !== -1) {
+          if(!success && (message.indexOf('token') !== -1 || message.indexOf('Erreur') !== -1)) {
             AdminStorage.clearStokage();
+            router.reload();
             return { message: "Session Expiré veuillez vous réconnecter" , success};
           } 
           return { message , success};
@@ -308,7 +311,7 @@ export default class ConsumApi {
 
     // Gestion departements
 
-    static async getAllAdmin() {
+    static async getAllAdmin(router) {
       try {
         const token = AdminStorage.getTokenAdmin();
           const response = await this.api.get(apiUrl.getAlladmin, {headers: {'Authorization': `Bearer ${token}`}});
@@ -317,6 +320,7 @@ export default class ConsumApi {
             if(success) return { data , success}
             if(!success && message.indexOf('token') !== -1) {
               AdminStorage.clearStokage();
+              router.reload();
               return { message: "Session Expiré veuillez vous réconnecter" , success};
             } 
             return { message , success};
@@ -335,6 +339,7 @@ export default class ConsumApi {
       try {
         const token = AdminStorage.getTokenAdmin();
         const body = {nom_complet, email, password, departement_id, role_id, gravatars, contact};
+        console.log(body);
           const response = await this.api.post(apiUrl.addadmin, body, {headers: {'Authorization': `Bearer ${token}`}});
           if (response.status === 200) {
             const { data , success, message = ''} = response.data;

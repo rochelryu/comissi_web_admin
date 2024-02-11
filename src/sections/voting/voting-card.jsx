@@ -25,7 +25,7 @@ import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function VotingCard({ post, index }) {
+export default function VotingCard({ post, index, admin }) {
   const { cover, title, id, beginDate, endDate, display } = post;
   const router = useRouter();
 
@@ -109,9 +109,14 @@ export default function VotingCard({ post, index }) {
             </Box>
           </Card>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Button variant="contained" onClick={(event) => { event.preventDefault()}} color="info" startIcon={<Iconify icon="iconamoon:edit-light" />}>
-                Modifier
-              </Button>
+              {
+                admin.role <= 2 &&
+                (
+                  <Button variant="contained" onClick={(event) => { event.preventDefault()}} color="info" startIcon={<Iconify icon="iconamoon:edit-light" />}>
+                    Modifier
+                  </Button>
+                )
+              }
               <Button onClick={(event) => {
                 console.log(`${display !== 0 ? 'Désactiver': 'Activer'} ${id}`);
                 // event.preventDefault();
@@ -129,4 +134,5 @@ export default function VotingCard({ post, index }) {
 VotingCard.propTypes = {
   post: PropTypes.object.isRequired,
   index: PropTypes.number,
+  admin: PropTypes.object.isRequired
 };

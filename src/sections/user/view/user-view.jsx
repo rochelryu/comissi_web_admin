@@ -47,7 +47,7 @@ export default function UserPage() {
   }, []);
 
   const loadData = async () => {
-    const allAdmin = await ConsumApi.getAllAdmin();
+    const allAdmin = await ConsumApi.getAllAdmin(router);
     console.log(allAdmin);
     if(allAdmin.success) {
       setAdmins(allAdmin.data);

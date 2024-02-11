@@ -6,7 +6,7 @@ import {
   PlusCircleTwoTone,
   MinusCircleOutlined,
 } from "@ant-design/icons";
-import { Form, Space, Upload, Button, Select, Avatar, message, DatePicker, InputNumber } from 'antd';
+import { Form, Flex, Space, Switch, Upload, Button, Select, Avatar, message, DatePicker, InputNumber } from 'antd';
 
 import Box from '@mui/material/Box';
 import Step from '@mui/material/Step';
@@ -18,6 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import StepLabel from '@mui/material/StepLabel';
 import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Filter1Icon from '@mui/icons-material/Filter1';
 import Filter2Icon from '@mui/icons-material/Filter2';
@@ -109,7 +110,7 @@ ColorlibStepIcon.propTypes = {
   icon: PropTypes.node,
 };
 
-const steps = ['Création compétition', 'Création événement de vôte', 'Création des candidates'];
+const steps = ['Création compétition', 'Création événement de vôte'];
 
 
 // display image in preview
@@ -123,18 +124,27 @@ export default function CreateVotingSystem(props) {
 
   const [activeStep, setActiveStep] = useState(levelActiveStep ?? 0);
   const [buttonIsLoading, setButtonIsLoading] = useState(false);
+  const [isFinalCompetition, setIsFinalCompetition] = useState(false);
   const [nameCompetition, changeNameCompetition] = useState('');
 
-  const [base64, changeBase64] = useState('');
-  const [nameFileUploadBase64, changeNameFileUploadBase64] = useState('');
+  const [base64Cover, changeBase64Cover] = useState('');
+  const [base64LastMiss, changeBase64Miss] = useState('');
+  const [nameFileUploadBase64Cover, changeNameFileUploadBase64Cover] = useState('');
+  const [nameFileUploadBase64LastMiss, changeNameFileUploadBase64LastMiss] = useState('');
 
   const [descriptionCompetition, changeDescriptionCompetition] = useState('');
-  const [fileList, setFileList] = useState([]);
+  const [fileListCover, setFileListCover] = useState([]);
+  const [fileListLastMiss, setFileListLastMiss] = useState([]);
+
+
+  const [admins, setAdmins] = useState([]);
   // const [allNomine, setAllNomine] = useState([]);
 
   const [rangeDateEvent, setRangeDateEvent] = useState([]);
-  const [candidates, setCandidates] = useState([]);
-  const [candidatesChoice, setCandidatesChoice] = useState([]);
+  // const [candidates, setCandidates] = useState([]);
+  // const [candidatesChoice, setCandidatesChoice] = useState([]);
+  const [adminChoice, setAdminChoice] = useState('');
+  const [titleEvent, changeTitleEvent] = useState('');
   const [devise, changeDevise] = useState('');
   const [priceVote, setPriceVote] = useState('');
   const [location, changeLocation] = useState('');
@@ -148,29 +158,59 @@ export default function CreateVotingSystem(props) {
 
   useEffect(() => {
     verifyPositionStep();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const verifyPositionStep = async () => {
-    const allCandidateActivate = await ConsumApi.getAllCandidateActive();
-    const options = allCandidateActivate.data.map((item) => ({
-        label: item.matricule,
-        value: `${item.matricule.trim()}_${item.firstName.trim()} ${item.lastName.trim()}`,
-        img: item.photo,
-        desc: `${item.firstName} ${item.lastName}`,
-        id: item.id,
+    // const allCandidateActivate = await ConsumApi.getAllCandidateActive();
+    const allAdmin = await ConsumApi.getAllAdmin(router);
+    // const options = allCandidateActivate.data.map((item) => ({
+    //     label: item.matricule,
+    //     value: `${item.matricule.trim()}_${item.firstName.trim()} ${item.lastName.trim()}`,
+    //     img: item.photo,
+    //     desc: `${item.firstName} ${item.lastName}`,
+    //     id: item.id,
+    //   }));
+    const optionsAdmin = allAdmin.data.map((admin) => ({
+        label: admin.nom_complet,
+        value: admin.id,
+        img: admin.gravatars,
+        desc: admin.nom_departement,
+        id: admin.id,
       }))
-    setCandidates(options);    
+    // setCandidates(options);
+    setAdmins(optionsAdmin);
   }
 
+  const onChangeTypeCompetition = (checked) => {
+    setIsFinalCompetition(checked);
+    console.log(isFinalCompetition);
+  };
+
   const onChangeCompetitionCover = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
+    setFileListCover(newFileList);
     if (newFileList.length > 0) {
       const nameFile = `${newFileList[0].uid}.${newFileList[0].type.split('/')[1]}`;
-      changeNameFileUploadBase64(nameFile);
+      changeNameFileUploadBase64Cover(nameFile);
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result;
-        changeBase64(base64String);
+        changeBase64Cover(base64String);
+      };
+      reader.readAsDataURL(newFileList[0].originFileObj);
+    }
+    return false;
+  };
+
+  const onChangeCompetitionLastMiss = ({ fileList: newFileList }) => {
+    setFileListLastMiss(newFileList);
+    if (newFileList.length > 0) {
+      const nameFile = `${newFileList[0].uid}.${newFileList[0].type.split('/')[1]}`;
+      changeNameFileUploadBase64LastMiss(nameFile);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        changeBase64Miss(base64String);
       };
       reader.readAsDataURL(newFileList[0].originFileObj);
     }
@@ -183,62 +223,60 @@ export default function CreateVotingSystem(props) {
         alert({type: 'error', content: "Veuillez faire entrer un nom valide"});
       } else if (descriptionCompetition.trim().length < 4) {
         alert({type: 'error', content: "Veuillez faire entrer une description valide"});
-      } else if (fileList.length === 0) {
+      } else if (fileListCover.length === 0 ) {
         alert({type: 'error', content: "Veuillez charger une image de couverture"});
+      } else if (fileListLastMiss.length === 0) {
+        alert({type: 'error', content: "Veuillez charger une image de la dernière miss"});
       } else {
         setButtonIsLoading(true);
         alert({type: 'loading', content: "Enregistrement en cours..."});
-        
-        const newCompetion = await ConsumApi.createCompetition({base64: base64.trim(), name_file: nameFileUploadBase64.trim(), title: nameCompetition.trim(), describe: descriptionCompetition.trim()});
+        const newCompetion = await ConsumApi.createCompetition({base64Cover: base64Cover.trim(), name_file_cover: nameFileUploadBase64Cover.trim(),base64LastMiss: base64LastMiss.trim(), name_file_last_miss: nameFileUploadBase64LastMiss.trim(), title: nameCompetition.trim(), describe: descriptionCompetition.trim()}, router);
         setButtonIsLoading(false);
+        console.log(newCompetion);
         if(newCompetion.success) {
-          setFileList([]);
+          setFileListCover([]);
+          setFileListLastMiss([]);
           changeNameCompetition('');
-          changeBase64('');
-          changeNameFileUploadBase64('');
+          changeBase64Cover('');
+          changeBase64Miss('');
+          changeNameFileUploadBase64Cover('');
           changeDescriptionCompetition('');
           setActiveStep(1);
           alert({type: 'success', content: "Compétition crée avec succès"});
         } else {
           alert({type: 'error', content: "Un problème a été rencontré veuillez ressayer ultérieurement"});
         }
-        
-        
       }
     } else if(activeStep === 1) {
       if (rangeDateEvent.length !== 2) {
         alert({type: 'error', content: "Veuillez faire entrer une date de debut et de fin"});
       } else if (devise.trim().length < 2) {
         alert({type: 'error', content: "Veuillez faire entrer une devise valide"});
-      } else if (fileList.length === 0) {
+      } else if (fileListCover.length === 0) {
         alert({type: 'error', content: "Veuillez charger une image de couverture"});
       } else {
-        
         form.submit();
-        
       }
-    } else if (activeStep === 2) {
-      if(candidatesChoice.length > 0) {
-        setButtonIsLoading(true);
-        const nominate = candidatesChoice.map((item) => {
-          const matricule = item.split('_')[0];
-          
-          const {id} = candidates.filter((itemFilter) => itemFilter.label.trim() === matricule.trim())[0];
-          return id;
-        });
-        const {success} = await ConsumApi.setNominate({nominate});
-        if(success) {
-          router.reload();
-        } else {
-          alert({type: 'error', content: "Un problème rencontré, veuillez réssayer"});
-        }
-        setButtonIsLoading(false);
-      } else {
-        alert({type: 'error', content: "Veuillez choisir au moins une nominée"});
-        await verifyPositionStep();
-      }
-      
-    }
+    } // else if (activeStep === 2) {
+    //   if(candidatesChoice.length > 0) {
+    //     setButtonIsLoading(true);
+    //     const nominate = candidatesChoice.map((item) => {
+    //       const matricule = item.split('_')[0];
+    //       const {id} = candidates.filter((itemFilter) => itemFilter.label.trim() === matricule.trim())[0];
+    //       return id;
+    //     });
+    //     const {success} = await ConsumApi.setNominate({nominate});
+    //     if(success) {
+    //       router.reload();
+    //     } else {
+    //       alert({type: 'error', content: "Un problème rencontré, veuillez réssayer"});
+    //     }
+    //     setButtonIsLoading(false);
+    //   } else {
+    //     alert({type: 'error', content: "Veuillez choisir au moins une nominée"});
+    //     await verifyPositionStep();
+    //   }
+    // }
   }
 
   const onFinish = async (values) => {
@@ -247,8 +285,11 @@ export default function CreateVotingSystem(props) {
       alert({type: 'loading', content: "Enregistrement en cours..."});
       const newEvent = await ConsumApi.createEvent(
         {
-          base64: base64.trim(),
-          name_file: nameFileUploadBase64.trim(),
+          title: titleEvent.trim(),
+          level: isFinalCompetition ? 0 : 1,
+          admin_id: parseInt(adminChoice, 10),
+          base64: base64Cover.trim(),
+          name_file: nameFileUploadBase64Cover.trim(),
           beginDate: rangeDateEvent[0].toDate(),
           endDate: rangeDateEvent[1].toDate(),
           price: priceVote.trim().length === 0 ? 0:  parseInt(priceVote.trim(), 10),
@@ -259,15 +300,28 @@ export default function CreateVotingSystem(props) {
         setButtonIsLoading(false);
         if(newEvent.success) {
           alert({type: 'success', content: "Édition crée avec succès"});
-          setActiveStep(2);
+          setRangeDateEvent([]);
+          changeDevise('');
+          changeTitleEvent('');
+          changeLocation("");
+          setFileListCover([]);
+          changeBase64Cover('');
+          setPriceVote('');
+          changeDevise('');
+          form.resetFields();
+          await verifyPositionStep();
         } else {
           alert({type: 'error', content: "Un problème a été rencontré veuillez ressayer ultérieurement"});
         }
     }
   };
 
-  const choiceCandidate = (value) => {
-    setCandidatesChoice(value);
+  // const choiceCandidate = (value) => {
+  //   setCandidatesChoice(value);
+  // }
+  const choiceAdmin = (value) => {
+    setAdminChoice(value);
+    console.log(adminChoice);
   }
 
 
@@ -296,32 +350,53 @@ export default function CreateVotingSystem(props) {
               }}
             >
               <Stack spacing={3} sx={{width: '100%'}}>
-                <Stack direction="row" alignItems="center" justifyContent="center" mb={1} sx={{width: '100%'}}>
-                  <ImgCrop showGrid rotationSlider aspectSlider showReset>
-                    <Upload
-                      listType="picture"
-                      accept='image/png, image/jpeg, image/webp'
-                      fileList={fileList}
-                      beforeUpload={(file) => false}
-                      onChange={onChangeCompetitionCover}
-                      onPreview={onPreviewCompetitionCover}
-                    >
-                      {fileList.length < 1 && (
-                      <Box component='div' sx={{width: 300, border: 'dashed #e0e0e0', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection:'column', padding: 2, cursor: 'pointer'}}>
-                          <Iconify icon="openmoji:picture" />
-                        <span className="ant-upload-text">Charger une photo de couverture</span>
-                        
-                      </Box>
-                      )
-                      }
-                    </Upload>
-                  </ImgCrop>
-                </Stack>
-              
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Stack direction="row" alignItems="center" justifyContent="center" mb={1} sx={{width: '100%'}}>
+                      <ImgCrop showGrid rotationSlider aspectSlider showReset>
+                        <Upload
+                          listType='picture'
+                          accept='image/png, image/jpeg, image/webp'
+                          fileList={fileListCover}
+                          beforeUpload={(file) => false}
+                          onChange={onChangeCompetitionCover}
+                          // onPreview={onPreviewCompetitionCover}
+                        >
+                          {fileListCover.length < 1 && (
+                          <Box component='div' sx={{width: 300, border: 'dashed #e0e0e0', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection:'column', padding: 2, cursor: 'pointer'}}>
+                              <Iconify icon="openmoji:picture" />
+                            <span className="ant-upload-text">Charger une photo de couverture</span>
+                          </Box>
+                          )
+                          }
+                        </Upload>
+                      </ImgCrop>
+                    </Stack>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Stack direction="row" alignItems="center" justifyContent="center" mb={1} sx={{width: '100%'}}>
+                        <Upload
+                          listType='picture'
+                          accept='image/png'
+                          fileList={fileListLastMiss}
+                          
+                          beforeUpload={(file) => false}
+                          onChange={onChangeCompetitionLastMiss}
+                        >
+                          {fileListLastMiss.length < 1 && (
+                          <Box component='div' sx={{width: 300, border: 'dashed #e0e0e0', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection:'column', padding: 2, cursor: 'pointer'}}>
+                              <Iconify icon="openmoji:picture" />
+                            <span className="ant-upload-text text-center">Charger la photo de la miss pour édition précédente</span>
+                          </Box>
+                          )
+                          }
+                        </Upload>
+                    </Stack>
+                  </Grid>
+                </Grid>
                 <TextField value={nameCompetition} onChange={(event)=> {changeNameCompetition(event.target.value)}} label="Nom de la compétition" />
-                <TextField value={descriptionCompetition} onChange={(event)=> {changeDescriptionCompetition(event.target.value)}} label="Description de la compétition" />
-                
-                
+                <TextField value={descriptionCompetition} onChange={(event)=> {changeDescriptionCompetition(event.target.value)}} label="Libélé de la compétition" />
                 <LoadingButton
                   fullWidth
                   loading={buttonIsLoading}
@@ -350,14 +425,15 @@ export default function CreateVotingSystem(props) {
               <Stack direction="row" alignItems="center" justifyContent="center" mb={1} sx={{width: '100%'}}>
                 <ImgCrop showGrid rotationSlider aspectSlider showReset>
                   <Upload
-                    listType="picture"
+                    listType='picture'
                     accept='image/png, image/jpeg, image/webp'
-                    fileList={fileList}
+                    fileList={fileListCover}
+                    
                     beforeUpload={(file) => false}
                     onChange={onChangeCompetitionCover}
                     onPreview={onPreviewCompetitionCover}
                   >
-                    {fileList.length < 1 && (
+                    {fileListCover.length < 1 && (
                     <Box component='div' sx={{width: 300, border: 'dashed #e0e0e0', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection:'column', padding: 2, cursor: 'pointer'}}>
                         <Iconify icon="openmoji:picture" />
                       <span className="ant-upload-text">Charger une photo de couverture</span>
@@ -368,7 +444,40 @@ export default function CreateVotingSystem(props) {
                   </Upload>
                 </ImgCrop>
               </Stack>
-            
+              <TextField value={titleEvent} onChange={(event)=> {changeTitleEvent(event.target.value)}} label="Nom de l'évènement" />
+              <Grid container spacing={3}>
+                <Grid xs={12} sm={7} md={7}>
+                  <Select
+                  size='large'
+                    style={{
+                      width: '100%',
+                    }}
+                    placeholder="Choisir l'administrateur en charge de cette compétition"
+                    // value={allNomine}
+                    onChange={choiceAdmin}
+                    optionLabelProp="label"
+                    options={admins}
+                    optionRender={(option) => (
+                      <Space>
+                        <span role="img" aria-label={option.data.label}>
+                          <Avatar src={`${apiUrlAsset.avatars}/${option.data.img}`} />
+                        </span>
+                        {option.data.label} ({option.data.desc.trim().toLocaleUpperCase()})
+                      </Space>
+                    )}
+                  />
+                </Grid>
+                <Grid xs={12} sm={4} md={4}>
+                  <Flex justify='flex-start' align='center'>
+                    <Switch
+                      onChange={onChangeTypeCompetition}
+                      checkedChildren={<Iconify icon="solar:cup-star-broken" sx={{color: '#ffb636'}}/>}
+                    />
+                    <Typography variant="h5" sx={{marginLeft: 1}} gutterBottom >{isFinalCompetition ? " Finale": "Préselection"}</Typography>
+                  </Flex>
+                  
+                </Grid>
+              </Grid>
               <RangePicker 
                 disabledDate={disabledDate}
                 size='large'
@@ -500,7 +609,7 @@ export default function CreateVotingSystem(props) {
         </Stack>
         )}
 
-        {activeStep === 2 && (
+        {/* {activeStep === 2 && (
           <Stack alignItems="center" justifyContent="center" sx={{ height: 1,  width: '100%', marginTop: 6 }}>
             <Card
               sx={{
@@ -548,8 +657,7 @@ export default function CreateVotingSystem(props) {
               </Stack>
             </Card>
           </Stack>
-        )}
-        
+        )} */}
         
       </Grid>
 

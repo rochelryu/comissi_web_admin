@@ -1,6 +1,6 @@
-import { message } from 'antd';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {Modal,  Space, Select, Avatar, message } from 'antd';
 
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
@@ -20,6 +20,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 
 import { useRouter } from 'src/routes/hooks';
 
+import {apiUrlAsset} from 'src/constants/apiUrl';
 import ConsumApi from 'src/services_workers/consum_api';
 
 import Iconify from 'src/components/iconify';
@@ -31,7 +32,10 @@ export default function ProductsView() {
   // const [checked, setOpenFilter] = useState(false);
   const { eventId } = useParams();
   const router = useRouter();
-  const [openCreateDepartement, setOpenCreateDepartement] = useState(false);
+  const [modalUpdateDauphine, toogleModalUpdateDauphine] = useState(false);
+
+  const [candidates, setCandidates] = useState([]);
+  const [candidatesChoice, setCandidatesChoice] = useState([]);
 
   const [isFetching, setFetch] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
@@ -40,6 +44,7 @@ export default function ProductsView() {
   const [ranking, setRanking] = useState('');
   const [indexToEdit, setIndexToEdit] = useState(-1);
   const [nominateId, setNominateId] = useState('');
+  const [modalAddDauphin, toogleModalAddDauphin] = useState(false);
   
 
   const alert = ({type, content}) => {
@@ -55,8 +60,18 @@ export default function ProductsView() {
   }, []);
 
   const loadInfo = async () => {
+    setFetch(true);
     const {success, data} = await ConsumApi.getDetailsEvent({eventId});
+    const allCandidateActivate = await ConsumApi.getAllCandidateActive();
+    const options = allCandidateActivate.data.map((item) => ({
+      label: item.matricule,
+      value: `${item.matricule.trim()}_${item.firstName.trim()} ${item.lastName.trim()}`,
+      img: item.photo,
+      desc: `${item.firstName} ${item.lastName}`,
+      id: item.id,
+    }));
     if(success) {
+      setCandidates(options);
       setEvent(data[0]);
       toogleDisplay(data[0].display === 1);
       setFetch(false);
@@ -74,24 +89,52 @@ export default function ProductsView() {
 
   }
 
-  const handleToogleDialogCreateDepartement = () => {
-    setOpenCreateDepartement(!openCreateDepartement);
+  const handleToogleUpdateDauphine = () => {
+    toogleModalUpdateDauphine(!modalUpdateDauphine);
+  };
+  const handleToogleAddDauphine = () => {
+    toogleModalAddDauphin(!modalAddDauphin);
   };
 
-  const createNumeroDauphine = async () => {
-    const {candidates} = event;
-    candidates[indexToEdit].pivot.ranking = ranking;
+  const choiceCandidate = (value) => {
+    setCandidatesChoice(value);
+  }
 
-    setEvent({...event, candidates});
-    handleToogleDialogCreateDepartement();
+  const createNumeroDauphine = async () => {
+    const {candidates:candidatesEvent} = event;
+    candidatesEvent[indexToEdit].pivot.ranking = ranking;
+
+    setEvent({...event, candidates:candidatesEvent});
+    handleToogleUpdateDauphine();
     await ConsumApi.setNumberNominate({event_id:eventId, ranking, candidate_id: nominateId});
+  };
+
+  const addDauphineToEvent = async () => {
+    if(candidatesChoice.length > 0) {
+      alert({type: 'loading', content: "Enregistrement en cours..."});
+      const nominate = candidatesChoice.map((item) => {
+        const matricule = item.split('_')[0];
+        const {id} = candidates.filter((itemFilter) => itemFilter.label.trim() === matricule.trim())[0];
+        return id;
+      });
+      const {success} = await ConsumApi.setNominate({nominate, event_id:eventId });
+      if(success) {
+        handleToogleAddDauphine();
+        await loadInfo();
+      } else {
+        handleToogleAddDauphine();
+        alert({type: 'error', content: "Un problème rencontré, veuillez réssayer"});
+      }
+    } else {
+      alert({type: 'error', content: "Veuillez choisir au moins une nominée"});
+    }
   };
 
   const setNumberNominate = ({rankingNumber, idCandidate, index}) => {
     setNominateId(idCandidate);
     setRanking(rankingNumber);
     setIndexToEdit(index);
-    handleToogleDialogCreateDepartement();
+    handleToogleUpdateDauphine();
   };
 
   return (
@@ -114,8 +157,8 @@ export default function ProductsView() {
           
           <FormControlLabel control={<Switch checked={isDisplay} onChange={toogleDisplayEvent} color="warning" />} label={isDisplay ? 'Actif': 'Inactif' } />
           <ProductSort />
-          <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
-                Ajouter Candidat
+          <Button variant="contained" onClick={handleToogleAddDauphine} color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+                Ajouter Candidates
           </Button>
       </Stack>
 
@@ -134,7 +177,7 @@ export default function ProductsView() {
         ))
         }
       </Grid>
-      <Dialog disableEscapeKeyDown open={openCreateDepartement} onClose={handleToogleDialogCreateDepartement}>
+      <Dialog disableEscapeKeyDown open={modalUpdateDauphine} onClose={handleToogleUpdateDauphine}>
         <DialogTitle>Modification numero de dauphine</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{mb: 3}}>
@@ -148,10 +191,46 @@ export default function ProductsView() {
             sx={{width: '80%',}} name="numero" label="Numero de dautphine" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleToogleDialogCreateDepartement}>Annuler</Button>
+          <Button onClick={handleToogleUpdateDauphine}>Annuler</Button>
           <Button onClick={createNumeroDauphine}>Enregistrer</Button>
         </DialogActions>
       </Dialog>
+      <Modal
+      centered
+      title="Ajouter des dauphines"
+      open={modalAddDauphin}
+      onOk={handleToogleAddDauphine}
+      onCancel={handleToogleAddDauphine}
+      footer={[
+        <>
+          <Button onClick={handleToogleAddDauphine}>Annuler</Button>
+          <Button onClick={addDauphineToEvent}>Enregistrer</Button>
+        </>
+      ]}
+      >
+          <Typography variant='h6'>Veuillez selectionner des dauphines pour y ajouter à cet évènement.</Typography>
+          <Select
+                size='large'
+                  mode="multiple"
+                  style={{
+                    width: '100%',
+                    marginTop: 10
+                  }}
+                  placeholder="Choisir les candidates"
+                  // value={allNomine}
+                  onChange={choiceCandidate}
+                  optionLabelProp="label"
+                  options={candidates}
+                  optionRender={(option) => (
+                    <Space>
+                      <span role="img" aria-label={option.data.label}>
+                        <Avatar src={`${apiUrlAsset.candidate}/${option.data.img}`} />
+                      </span>
+                      {option.data.desc} ({option.data.label})
+                    </Space>
+                  )}
+                />
+      </Modal>
       {/* <ProductCartWidget /> */}
     </Container>
   );
