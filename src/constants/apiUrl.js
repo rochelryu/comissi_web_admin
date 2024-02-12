@@ -1,6 +1,6 @@
 
 const base_url = process.env.NODE_ENV === 'development' ? 'https://bcomissi.shouz.network/api/admin': 'https://bcomissi.shouz.network/api/admin'; // 'https://comici.loca.lt/api/admin':'https://bcomissi.shouz.network/api/admin';
-const base_url_asset = process.env.NODE_ENV === 'development' ? 'https://bcomissi.shouz.network/api/images': 'https://bcomissi.shouz.network/api/images'; // 'https://comici.loca.lt/images':'https://bcomissi.shouz.network/images';
+const base_url_asset = process.env.NODE_ENV === 'development' ? 'https://bcomissi.shouz.network/images': 'https://bcomissi.shouz.network/images'; // 'https://comici.loca.lt/images':'https://bcomissi.shouz.network/images';
 
 export const apiUrl =  {
     authentication: `${base_url}/login`,

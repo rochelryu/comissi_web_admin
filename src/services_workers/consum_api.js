@@ -4,7 +4,7 @@ import {apiUrl} from 'src/constants/apiUrl';
 import {AdminStorage} from 'src/storages/admins_storage';
 
 export default class ConsumApi {
-  static api = axios.create();
+  static api = axios.create({headers: {"Access-Control-Allow-Origin": "*"}});
 
   // eslint-disable-next-line class-methods-use-this
   static async createCompetition({base64Cover, base64LastMiss, name_file_cover, name_file_last_miss, title, describe}, router) {
